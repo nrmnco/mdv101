@@ -67,6 +67,8 @@ module tt_um_bitty (
     
     reg uart_sel;
 
+    wire [15:0] out [7:0];
+
     parameter S0 = 4'b0000;
     parameter S1 = 4'b0001;
     parameter S2 = 4'b0010;
@@ -160,6 +162,7 @@ module tt_um_bitty (
         .out({unused_15bit, tx_en})
     );
 
+
     //Bitty instance
     bitty bitty_inst(
         .clk(clk),
@@ -172,7 +175,8 @@ module tt_um_bitty (
         .tx_en(tx_en_bitty),
         .tx_data(from_bitty_to_uart),
         .done(done),
-        .d_out(d_out)
+        .d_out(d_out),
+        .out(out)
     );
 
     always @(posedge clk) begin
@@ -185,10 +189,15 @@ module tt_um_bitty (
     end
 
    always @(*) begin
-         run_bitty = 1'b0;
-         en_pc = 1'b0;
-         uart_sel = 1'b0;
-         stop_for_rw = 1'b0;
+        // $display("rx_data_bit: ", rx_data_bit);
+        // $display("final state: ", cur_state);
+        // $display("instruction: ", mem_out);
+        // $display("run: ", run_bitty);
+        // $display("done: ", done);
+        run_bitty = 1'b0;
+        en_pc = 1'b0;
+        uart_sel = 1'b0;
+        stop_for_rw = 1'b0;
         case (cur_state)
             S0: begin
                 stop_for_rw = 1'b0;
@@ -200,9 +209,11 @@ module tt_um_bitty (
                 run_bitty = 1'b1;
             end
             S6: begin
+                run_bitty = 1'b1;
                 stop_for_rw = 1'b0;
             end
             S7: begin
+                run_bitty = 1'b1;
                 uart_sel = 1'b1;
                 stop_for_rw = 1'b1;
             end
